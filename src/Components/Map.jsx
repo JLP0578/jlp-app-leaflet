@@ -1,44 +1,38 @@
-import React, {useState} from 'react';
-import {MapContainer, TileLayer, Marker, Popup, useMapEvents} from 'react-leaflet'
+import React, {useEffect, useState} from 'react';
+import {MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap} from 'react-leaflet'
 
-import MapReducer from "../Reducers/MapReducer";
 import {useMapContext} from "../Contexts/MapContext";
 import {Link} from "react-router-dom";
 
-//import 'leaflet/dist/leaflet.css';
 const Map = () => {
     const {state, dispatch} = useMapContext()
 
-    console.log(state);
-
-    const [lat, setLat] = useState(44)
-    const [lng, setLng] = useState(6)
-    const [zoom, setZoom] = useState(9)
-
-    function save(id, lat ,lng) {
-        dispatch({type: 'addmarker', data: {id: id, lat: lat, lng: lng}})
-        console.log(state)
+    const Loc = () => {
+        const map = useMap()
+        useEffect(() => {
+            if('geolocalisation' in navigator){
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const {lat, lng} = pos.coords
+                    map.setView([lat, lng])
+                })
+            }
+        },[])
+        return <></>
     }
 
+
     const AddMarker = () => {
-        const [position, setPosition] = useState([])
-        const [count, setCount] = useState(0)
-        const Markers = null
-        const mapv2 = useMapEvents({
-            click(e,click) {
-                //console.log('click ' + e.latlng)
-                //console.log(position);
-                setCount(prevCount => prevCount + 1)
-                console.log(count);
-                save(count,e.latlng.lat,e.latlng.lng)
-                //console.log(state)
-                //map.locate()
+        const map = useMapEvents({
+            click(e) {
+                const {lat , lng} = e.latlng
+                dispatch({type: 'addmarker', marker: [lat, lng]})
+
+                if('vibrate' in navigator) navigator.vibrate(1000)
             }
         })
-        console.log(position);
         return (
             <>
-                {position.map((loc) => {
+                {state.markers.map((loc) => {
                         return (
                             <Marker position={loc}>
                                 <Popup>You are here</Popup>
@@ -53,33 +47,26 @@ const Map = () => {
     const TILE_LAYER2 = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
+    const NameCurrentUser = () => {
+        return(
+            <>
+                <p>Hello, {state.user.nom} !!!</p>
+            </>
+        )
+    }
+
     return (
         <>
-            {`Hello, ${state?.user?.firstName} !!!`}
+            {state.user? <NameCurrentUser /> : ''}
             <MapContainer
-                center={[lat, lng]}
-                zoom={zoom}
+                center={[46.232192999999995, 2.209666999999996]}
+                zoom={5}
             >
                 <TileLayer attribution={ATTRIBUTION} url={TILE_LAYER2}/>
                 <AddMarker/>
             </MapContainer>
-            <Link to="/List" onClick={() => {
-                save()
-            }}>View markers</Link>
         </>
     );
 }
 
 export default Map
-
-/*
-{marker.map( () => {
-                return (
-                    <Marker key={} position={}>
-                        <Popup>
-                            <span>A pretty CSS3 popup. <br/> Easily customizable.</span>
-                        </Popup>
-                    </Marker>
-                );
-            })};
-* */

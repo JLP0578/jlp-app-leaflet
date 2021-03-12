@@ -1,13 +1,20 @@
 const MapReducer = (state, action) => {
-  const { type, data } = action
-  switch (type) {
+  switch (action.type) {
+
     case 'addmarker':
-      return { ...state, markers: [{id: data.nb, lat: data.lat, lng: data.lng}] }
-      //{id: data.nb, lat: data.lat, lng: data.lng}
-    /*case 'removemarker':
-      return { ...state, marker: [...state(state.markers || []), action.marker] }*/
+      return { ...state, markers: [...state.markers, action.marker] }
+
+
+    case 'removemarker':
+      const markers = [...state.markers]
+      markers.splice(action.i, 1)
+      return { ...state, markers: [...(markers || [])] }
+
+
     case 'adduser':
-      return { ...state, user: { firstName: data.firstName, lastName: data.lastName, email: data.email}}
+      return { ...state, user: {...state.user, ...action.user} }
+
+
     default:
       return { ...state }
   }

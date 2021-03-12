@@ -14,20 +14,24 @@ function App() {
     const [state, dispatch] = useReducer(MapReducer, {markers: []})
     const context = { state, dispatch }
 
-    //console.log(state)
-
   return (
       <MapContext.Provider value={context}>
               <Router>
                   <Switch>
                       <Route path="/Map">
+                          <Menu />
                           <Map />
                       </Route>
                       <Route path="/List">
+                          <Menu />
                           <List />
                       </Route>
                       <Route path="/User">
+                          <Menu />
                           <User />
+                      </Route>
+                      <Route path="/">
+                          <Redirect to="/Map"/>
                       </Route>
                   </Switch>
               </Router>
